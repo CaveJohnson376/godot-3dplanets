@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=6 format=2]
 
 [sub_resource type="GDScript" id=5]
 script/source = "extends KinematicBody
@@ -13,13 +13,13 @@ var velocity = Vector3()
 var mousemotion
 var tile = 0
 onready var prevpos = translation
-onready var cam = $primarycam
+onready var cam = $offset/primarycam
 
 func tri2normal(a, b, c):
 	var p = b - a
 	var q = c - a
 	var n = p.cross(q)
-	
+	print(n)
 	if n:
 		return n.normalized()
 	else:
@@ -38,19 +38,19 @@ func _process(_delta):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
-	$CanvasLayer/ViewportContainer/Viewport.size = get_viewport().size/4
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
 	var pos = translation
-	var up = Vector3(0, 0, 0).direction_to(pos)
+	var up = pos.normalized()
 	
 	#$CanvasLayer/ViewportContainer/Viewport/Camera.global_transform.origin = (up*100)+pos
 	#$CanvasLayer/ViewportContainer/Viewport/Camera.global_transform = $CanvasLayer/ViewportContainer/Viewport/Camera.global_transform.looking_at(pos, Vector3(0, 1, 0))
 	
 	if mousemotion:
-		cam.rotation.x = clamp(cam.rotation.x + (mousemotion.y * sensetivity), deg2rad(-90), deg2rad(90))
-		rotate_y(mousemotion.x*sensetivity)
+		cam.rotation.x = clamp(cam.rotation.x + (mousemotion.y * sensetivity), deg2rad(0), deg2rad(180))
+		$offset.rotate_z(mousemotion.x*sensetivity)
 		pass
 	mousemotion = null
 	
@@ -61,18 +61,24 @@ func _physics_process(delta):
 	
 	
 	var move = Vector3()
-	move.z = int(Input.is_action_pressed(\"backward\"))-int(Input.is_action_pressed(\"forward\"))
+	move.y = -int(Input.is_action_pressed(\"backward\"))+int(Input.is_action_pressed(\"forward\"))
 	move.x = int(Input.is_action_pressed(\"straferight\"))-int(Input.is_action_pressed(\"strafeleft\"))
 	
-	velocity += (transform.basis.z * move.z + transform.basis.x * move.x) * delta * speed
+	velocity += ($offset.global_transform.basis.y * move.y + $offset.global_transform.basis.x * move.x) * delta * speed
 	
 	velocity = move_and_slide(velocity, up, true)
 	
-	var deltanormal = tri2normal(Vector3(0, 0, 0), pos, prevpos)
-	if deltanormal:
-		var angle = deg2rad((pos.normalized().dot(prevpos.normalized()) - 1)* -90)
-		rotate(deltanormal, angle)
-	prevpos = pos
+	transform = transform.orthonormalized()
+	if transform.basis.y.normalized().cross(-up) != Vector3():
+		look_at(Vector3(0, 0, 0), transform.basis.y)
+	elif transform.basis.x.normalized().cross(-up) != Vector3():
+		look_at(Vector3(0, 0, 0), transform.basis.x)
+	
+	#var deltanormal = tri2normal(Vector3(0, 0, 0), pos, prevpos)
+	#if deltanormal:
+	#	var angle = deg2rad((pos.normalized().dot(prevpos.normalized()) - 1)* -90)
+	#	rotate(deltanormal, angle)
+	#prevpos = pos
 	
 	pass
 
@@ -84,9 +90,6 @@ func _input(event):
 	
 	
 "
-
-[sub_resource type="CapsuleShape" id=1]
-radius = 0.5
 
 [sub_resource type="ParticlesMaterial" id=2]
 direction = Vector3( 0, 0, 0 )
@@ -102,80 +105,32 @@ albedo_color = Color( 0, 1, 1, 0.501961 )
 material = SubResource( 3 )
 size = Vector3( 1, 1, 1 )
 
-[sub_resource type="SpatialMaterial" id=10]
-flags_fixed_size = true
-
-[sub_resource type="CylinderMesh" id=6]
-material = SubResource( 10 )
-top_radius = 0.063
-bottom_radius = 0.25
-height = 0.5
-
-[sub_resource type="GDScript" id=9]
-script/source = "extends Viewport
-
-
-# Declare member variables here. Examples:
-# var a = 2
-# var b = \"text\"
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-"
+[sub_resource type="CapsuleShape" id=1]
+radius = 0.5
 
 [node name="player" type="KinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
 script = SubResource( 5 )
 
-[node name="collision" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 1, 0 )
-shape = SubResource( 1 )
+[node name="offset" type="Spatial" parent="."]
 
-[node name="primarycam" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0 )
+[node name="primarycam" type="Camera" parent="offset"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -6.55671e-08, 1.5 )
 current = true
 fov = 100.0
 far = 5000.0
 
-[node name="placeablock" type="RayCast" parent="primarycam"]
+[node name="placeablock" type="RayCast" parent="offset/primarycam"]
 enabled = true
 cast_to = Vector3( 0, 0, -10 )
 
-[node name="blockpos" type="Particles" parent="primarycam/placeablock"]
+[node name="blockpos" type="Particles" parent="offset/primarycam/placeablock"]
 visible = false
 amount = 1
 lifetime = 0.05
 process_material = SubResource( 2 )
 draw_pass_1 = SubResource( 4 )
 
-[node name="debugmesh" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 1, 0 )
-mesh = SubResource( 6 )
-material/0 = null
-
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-follow_viewport_enable = true
-
-[node name="ViewportContainer" type="ViewportContainer" parent="CanvasLayer"]
-anchor_right = 0.4
-anchor_bottom = 0.4
-stretch = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Viewport" type="Viewport" parent="CanvasLayer/ViewportContainer"]
-size = Vector2( 409, 240 )
-handle_input_locally = false
-render_target_update_mode = 3
-script = SubResource( 9 )
-
-[node name="Camera" type="Camera" parent="CanvasLayer/ViewportContainer/Viewport"]
-projection = 1
-current = true
-size = 2000.0
-far = 10000.0
+[node name="collision" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.37114e-08, 1 )
+shape = SubResource( 1 )
