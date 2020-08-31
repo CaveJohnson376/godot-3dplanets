@@ -33,6 +33,7 @@ enabled = true
 cast_to = Vector3( 0, 0, -10 )
 
 [node name="blockpos" type="Particles" parent="primarycam/placeablock"]
+visible = false
 amount = 1
 lifetime = 0.05
 process_material = SubResource( 2 )
