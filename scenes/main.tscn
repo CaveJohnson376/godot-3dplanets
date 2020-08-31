@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://textures/grass1.jpg" type="Texture" id=1]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_texture = ExtResource( 1 )
+
+[sub_resource type="SphereMesh" id=2]
+material = SubResource( 1 )
+radius = 1000.0
+height = 2000.0
+radial_segments = 1024
+rings = 512
+
+[sub_resource type="SphereShape" id=3]
+radius = 4096.0
+
+[sub_resource type="SphereShape" id=4]
+radius = 1000.0
+
+[node name="main" type="Spatial"]
+
+[node name="Planet" type="MeshInstance" parent="."]
+mesh = SubResource( 2 )
+material/0 = null
+
+[node name="gravity" type="Area" parent="."]
+space_override = 3
+gravity_point = true
+
+[node name="gravityzone" type="CollisionShape" parent="gravity"]
+shape = SubResource( 3 )
+
+[node name="collision" type="StaticBody" parent="."]
+
+[node name="collisionzone" type="CollisionShape" parent="collision"]
+shape = SubResource( 4 )
