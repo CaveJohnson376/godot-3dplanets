@@ -49,7 +49,9 @@ tracks/2/keys = {
 [sub_resource type="CubeMesh" id=3]
 size = Vector3( 1, 1, 1 )
 
-[node name="cube" type="StaticBody"]
+[node name="cube" type="StaticBody" groups=[
+"cubeblock",
+]]
 
 [node name="collision" type="CollisionShape" parent="."]
 shape = SubResource( 1 )

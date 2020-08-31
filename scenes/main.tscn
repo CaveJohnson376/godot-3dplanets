@@ -1,6 +1,30 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://textures/grass1.jpg" type="Texture" id=1]
+[ext_resource path="res://scenes/player.tscn" type="PackedScene" id=2]
+
+[sub_resource type="GDScript" id=5]
+script/source = "extends Spatial
+
+
+# Declare member variables here. Examples:
+# var a = 2
+# var b = \"text\"
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta):
+#	pass
+
+func _input(event):
+	if event.is_action_pressed(\"restart\"):
+		get_tree().reload_current_scene()
+"
 
 [sub_resource type="SpatialMaterial" id=1]
 albedo_texture = ExtResource( 1 )
@@ -19,6 +43,7 @@ radius = 4096.0
 radius = 1000.0
 
 [node name="main" type="Spatial"]
+script = SubResource( 5 )
 
 [node name="Planet" type="MeshInstance" parent="."]
 mesh = SubResource( 2 )
@@ -31,7 +56,12 @@ gravity_point = true
 [node name="gravityzone" type="CollisionShape" parent="gravity"]
 shape = SubResource( 3 )
 
-[node name="collision" type="StaticBody" parent="."]
+[node name="collision" type="StaticBody" parent="." groups=[
+"planet",
+]]
 
 [node name="collisionzone" type="CollisionShape" parent="collision"]
 shape = SubResource( 4 )
+
+[node name="player" parent="." instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1000, 0 )
