@@ -13,7 +13,6 @@ var velocity = Vector3()
 var mousemotion
 var tile = 0
 onready var prevpos = translation
-onready var meshlib = load(\"res://lmao.tres\")
 onready var cam = $primarycam
 
 func tri2normal(a, b, c):
@@ -32,7 +31,7 @@ func _ready():
 	
 	pass # Replace with function body.
 
-func _process(delta):
+func _process(_delta):
 	
 	if Input.is_action_just_pressed(\"ui_cancel\"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
@@ -43,6 +42,9 @@ func _process(delta):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
+	var pos = translation
+	var up = Vector3(0, 0, 0).direction_to(pos)
+	
 	if mousemotion:
 		cam.rotation.x = clamp(cam.rotation.x + (mousemotion.y * sensetivity), deg2rad(-90), deg2rad(90))
 		rotate_y(mousemotion.x*sensetivity)
@@ -51,8 +53,8 @@ func _physics_process(delta):
 	
 	speed = sprintspeed if Input.is_action_pressed(\"speedup\") else defspeed
 	
-	velocity = Vector3(0, velocity.y - gravity * delta, 0)
-	velocity.y += jumpspd * int(is_on_floor()) * int(Input.is_action_pressed(\"jump\"))
+	velocity -= gravity * up
+	velocity += jumpspd * int(is_on_floor()) * int(Input.is_action_pressed(\"jump\")) * up
 	
 	
 	var move = Vector3()
@@ -61,20 +63,19 @@ func _physics_process(delta):
 	
 	velocity += (transform.basis.z * move.z + transform.basis.x * move.x) * delta * speed
 	
-	velocity = move_and_slide(velocity, Vector3(0, 1, 0), true)
+	velocity = move_and_slide(velocity, up, true)
 	
-	var pos = translation
-	var deltanormal = tri2normal(pos, prevpos, Vector3(0, 0, 0))
+	var deltanormal = tri2normal(Vector3(0, 0, 0), pos, prevpos)
 	if deltanormal:
 		var angle = deg2rad((pos.normalized().dot(prevpos.normalized()) + 1)*90)
-		rotate(-deltanormal, angle)
+		rotate(deltanormal, -angle)
 	prevpos = pos
 	
 	pass
 
 func _input(event):
 	
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		mousemotion = event.relative
 		pass
 	
