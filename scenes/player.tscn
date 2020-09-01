@@ -1,91 +1,7 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://scenes/vectorconvertor.tscn" type="PackedScene" id=1]
-
-[sub_resource type="GDScript" id=1]
-script/source = "extends KinematicBody
-
-const gravity = 98/2       # gravity accel
-const sprintspeed = 1000   # speed when sprinting
-const defspeed = 250       # speed when walking
-var speed = 250            # current speed
-const jumpspd = 10         # speed of jump. Jump height depends on this
-const sensetivity = -0.005 # mouse input sensetivity
-var velocity = Vector3()   # player character movement stuff
-var mousemotion            # mouse motion
-var tile = 0               # result of copying code from other project [LEGACY]
-
-onready var prevpos = translation
-onready var cam = $offset/primarycam
-
-func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	pass
-
-func _process(_delta):
-	# lock/unlock mouse cursor
-	if Input.is_action_just_pressed(\"ui_cancel\"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-	
-	# it is cool to see stuff in the dark
-	if Input.is_action_just_pressed(\"flashlight\"):
-		$offset/primarycam/SpotLight.visible = !$offset/primarycam/SpotLight.visible
-	
-
-func _physics_process(delta):
-	# don't touch that
-	var pos = translation
-	var up = pos.normalized()
-	
-	# rotate player camera
-	if mousemotion:
-		cam.rotation.x = clamp(cam.rotation.x + (mousemotion.y * sensetivity), deg2rad(0), deg2rad(180))
-		$offset.rotate_z(mousemotion.x*sensetivity)
-		pass
-	mousemotion = null
-	
-	# set active speed for player charcter
-	speed = (sprintspeed if Input.is_action_pressed(\"speedup\") else defspeed)*scale.x
-	
-	# convert velocity to local space
-	velocity = $vectorconvertor.vector_global_to_local(Transform($offset.global_transform.basis, Vector3()), velocity)
-	
-	# apply vertical forces
-	velocity.z += jumpspd * int(Input.is_action_pressed(\"jump\")) * int(is_on_floor()) 
-	velocity.z -= gravity * delta
-	
-	# apply horizontal forces (not perfect solution. TODO: remake and polish this)
-	var move = Vector3()
-	move.y = -int(Input.is_action_pressed(\"backward\"))+int(Input.is_action_pressed(\"forward\"))
-	move.x = int(Input.is_action_pressed(\"straferight\"))-int(Input.is_action_pressed(\"strafeleft\"))
-	velocity.y = move.y * speed * delta
-	velocity.x = move.x * speed * delta
-	
-	# convert velocity back to global space
-	velocity = $vectorconvertor.vector_local_to_global(Transform($offset.global_transform.basis, Vector3()), velocity)
-	
-	# apply velocity to player character
-	velocity = move_and_slide(velocity, up, true)
-	
-	# planetary magic, completely not stolen from https://gitlab.com/LowBudgetTech/godot_walk_around_planet_3d
-	transform = transform.orthonormalized()
-	if transform.basis.y.normalized().cross(-up) != Vector3():
-		look_at(Vector3(0, 0, 0), transform.basis.y)
-	elif transform.basis.x.normalized().cross(-up) != Vector3():
-		look_at(Vector3(0, 0, 0), transform.basis.x)
-	
-	pass
-
-func _input(event):
-	# read mouse motions
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		mousemotion = event.relative
-		pass
-	
-"
+[ext_resource path="res://scenes/player.tres.gd" type="Script" id=2]
 
 [sub_resource type="CapsuleMesh" id=11]
 radius = 0.5
@@ -95,7 +11,7 @@ radius = 0.5
 
 [node name="player" type="KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
-script = SubResource( 1 )
+script = ExtResource( 2 )
 
 [node name="offset" type="Spatial" parent="."]
 
@@ -103,7 +19,7 @@ script = SubResource( 1 )
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -6.55671e-08, 1.5 )
 current = true
 fov = 90.0
-far = 5000.0
+far = 15000.0
 
 [node name="placeablock" type="RayCast" parent="offset/primarycam"]
 enabled = true

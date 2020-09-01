@@ -1,31 +1,9 @@
 [gd_scene load_steps=2 format=2]
 
-[sub_resource type="GDScript" id=13]
-script/source = "extends Node
-
-func transform_global_to_local(offset, global):
-	$offset.transform = offset
-	$offset/transform.global_transform = global
-	return $offset/transform.transform
-
-func transform_local_to_global(offset, local):
-	$offset.transform = offset
-	$offset/transform.transform = local
-	return $offset/transform.global_transform
-
-func vector_global_to_local(offset, global):
-	$offset.transform = offset
-	$offset/transform.global_transform.origin = global
-	return $offset/transform.transform.origin
-
-func vector_local_to_global(offset, local):
-	$offset.transform = offset
-	$offset/transform.transform.origin = local
-	return $offset/transform.global_transform.origin
-"
+[ext_resource path="res://scenes/vectorconvertor.tres.gd" type="Script" id=1]
 
 [node name="vectorconvertor" type="Node"]
-script = SubResource( 13 )
+script = ExtResource( 1 )
 
 [node name="offset" type="Spatial" parent="."]
 

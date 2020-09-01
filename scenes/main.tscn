@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://textures/8k_earth_daymap.jpg" type="Texture" id=1]
 [ext_resource path="res://scenes/player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://default_env.tres" type="Environment" id=3]
 [ext_resource path="res://textures/8k_earth_normal_map.png" type="Texture" id=4]
 [ext_resource path="res://scenes/main.tres.gd" type="Script" id=5]
+[ext_resource path="res://textures/sun.png" type="Texture" id=6]
 
 [sub_resource type="Curve" id=6]
 _data = [ Vector2( 0.417722, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.590717, 1 ), 0.0, 0.0, 0, 0 ]
@@ -24,6 +25,16 @@ rings = 512
 
 [sub_resource type="SphereShape" id=5]
 radius = 4096.0
+
+[sub_resource type="SpatialMaterial" id=7]
+flags_transparent = true
+flags_unshaded = true
+params_billboard_mode = 1
+albedo_texture = ExtResource( 6 )
+
+[sub_resource type="QuadMesh" id=8]
+material = SubResource( 7 )
+size = Vector2( 200, 200 )
 
 [node name="main" type="Spatial"]
 script = ExtResource( 5 )
@@ -54,11 +65,9 @@ transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 1000
 light_bake_mode = 0
 shadow_enabled = true
 
-[node name="sunlight2" type="DirectionalLight" parent="rotating_sun/offset"]
-transform = Transform( -1, -8.74228e-08, 3.82137e-15, 0, -4.37114e-08, -1, 8.74228e-08, -1, 4.37114e-08, 0, -10000, 0 )
-visible = false
-light_bake_mode = 0
-shadow_enabled = true
+[node name="sunhalo" type="MeshInstance" parent="rotating_sun/offset/sunlight"]
+mesh = SubResource( 8 )
+material/0 = null
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 3 )
