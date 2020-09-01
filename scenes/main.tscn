@@ -4,39 +4,7 @@
 [ext_resource path="res://scenes/player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://default_env.tres" type="Environment" id=3]
 [ext_resource path="res://textures/8k_earth_normal_map.png" type="Texture" id=4]
-
-[sub_resource type="GDScript" id=1]
-script/source = "extends Spatial
-
-
-# Declare member variables here. Examples:
-# var a = 2
-# var b = \"text\"
-export var colordark = Color()
-export var colorlight = Color()
-export(Curve) var colorramp
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	colorramp.bake()
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	$rotating_sun.rotation_degrees.z -= delta*10
-	#$WorldEnvironment.environment.background_sky_rotation_degrees = $rotating_sun.rotation_degrees
-	if colorramp:
-		var lookingatsun = range_lerp($player.translation.normalized().dot($rotating_sun/offset/sunlight.global_transform.origin.normalized()), -1, 1, 0, 1)
-		var skycolor = colordark.linear_interpolate(colorlight, colorramp.interpolate(lookingatsun))
-		$WorldEnvironment.environment.background_color = skycolor
-		$WorldEnvironment.environment.fog_color = skycolor
-	pass
-
-func _input(event):
-	if event.is_action_pressed(\"restart\"):
-		get_tree().reload_current_scene()
-"
+[ext_resource path="res://scenes/main.tres.gd" type="Script" id=5]
 
 [sub_resource type="Curve" id=6]
 _data = [ Vector2( 0.417722, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.590717, 1 ), 0.0, 0.0, 0, 0 ]
@@ -58,7 +26,7 @@ rings = 512
 radius = 4096.0
 
 [node name="main" type="Spatial"]
-script = SubResource( 1 )
+script = ExtResource( 5 )
 colorlight = Color( 0.647059, 0.839216, 0.945098, 1 )
 colorramp = SubResource( 6 )
 
