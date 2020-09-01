@@ -1,67 +1,96 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
-[ext_resource path="res://textures/grass1.jpg" type="Texture" id=1]
+[ext_resource path="res://textures/8k_earth_daymap.jpg" type="Texture" id=1]
 [ext_resource path="res://scenes/player.tscn" type="PackedScene" id=2]
+[ext_resource path="res://default_env.tres" type="Environment" id=3]
+[ext_resource path="res://textures/8k_earth_normal_map.png" type="Texture" id=4]
 
-[sub_resource type="GDScript" id=5]
+[sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
 
 
 # Declare member variables here. Examples:
 # var a = 2
 # var b = \"text\"
-
+export var colordark = Color()
+export var colorlight = Color()
+export(Curve) var colorramp
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	colorramp.bake()
 	pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func _process(delta):
+	$rotating_sun.rotation_degrees.z -= delta*10
+	#$WorldEnvironment.environment.background_sky_rotation_degrees = $rotating_sun.rotation_degrees
+	if colorramp:
+		var lookingatsun = range_lerp($player.translation.normalized().dot($rotating_sun/offset/sunlight.global_transform.origin.normalized()), -1, 1, 0, 1)
+		var skycolor = colordark.linear_interpolate(colorlight, colorramp.interpolate(lookingatsun))
+		$WorldEnvironment.environment.background_color = skycolor
+		$WorldEnvironment.environment.fog_color = skycolor
+	pass
 
 func _input(event):
 	if event.is_action_pressed(\"restart\"):
 		get_tree().reload_current_scene()
 "
 
-[sub_resource type="SpatialMaterial" id=1]
-albedo_texture = ExtResource( 1 )
+[sub_resource type="Curve" id=6]
+_data = [ Vector2( 0.417722, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.590717, 1 ), 0.0, 0.0, 0, 0 ]
 
-[sub_resource type="SphereMesh" id=2]
-material = SubResource( 1 )
-radius = 1000.0
-height = 2000.0
+[sub_resource type="SpatialMaterial" id=2]
+albedo_texture = ExtResource( 1 )
+normal_enabled = true
+normal_scale = 1.0
+normal_texture = ExtResource( 4 )
+
+[sub_resource type="SphereMesh" id=3]
+material = SubResource( 2 )
+radius = 4096.0
+height = 8192.0
 radial_segments = 1024
 rings = 512
 
-[sub_resource type="SphereShape" id=3]
+[sub_resource type="SphereShape" id=5]
 radius = 4096.0
 
-[sub_resource type="SphereShape" id=4]
-radius = 1000.0
-
 [node name="main" type="Spatial"]
-script = SubResource( 5 )
+script = SubResource( 1 )
+colorlight = Color( 0.647059, 0.839216, 0.945098, 1 )
+colorramp = SubResource( 6 )
 
 [node name="Planet" type="MeshInstance" parent="."]
-mesh = SubResource( 2 )
+mesh = SubResource( 3 )
 material/0 = null
-
-[node name="gravity" type="Area" parent="."]
-space_override = 3
-gravity_point = true
-
-[node name="gravityzone" type="CollisionShape" parent="gravity"]
-shape = SubResource( 3 )
 
 [node name="collision" type="StaticBody" parent="." groups=[
 "planet",
 ]]
 
 [node name="collisionzone" type="CollisionShape" parent="collision"]
-shape = SubResource( 4 )
+shape = SubResource( 5 )
 
 [node name="player" parent="." instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1000, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -3754.63, 1749.08, 0 )
+
+[node name="rotating_sun" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+
+[node name="offset" type="Spatial" parent="rotating_sun"]
+
+[node name="sunlight" type="DirectionalLight" parent="rotating_sun/offset"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10000, 0 )
+light_bake_mode = 0
+shadow_enabled = true
+
+[node name="sunlight2" type="DirectionalLight" parent="rotating_sun/offset"]
+transform = Transform( -1, -8.74228e-08, 3.82137e-15, 0, -4.37114e-08, -1, 8.74228e-08, -1, 4.37114e-08, 0, -10000, 0 )
+visible = false
+light_bake_mode = 0
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource( 3 )
