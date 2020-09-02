@@ -1,14 +1,16 @@
 extends KinematicBody
 
 const gravity = 98/2       # gravity accel
-const sprintspeed = 1000   # speed when sprinting
-const defspeed = 250       # speed when walking
+const sprintspeed = 50   # speed when sprinting
+const defspeed = 25       # speed when walking
+const accel = 10          # acceleration
 var speed = 250            # current speed
-const jumpspd = 15         # speed of jump. Jump height depends on this
+const jumpspd = 17         # speed of jump. Jump height depends on this
 const sensetivity = -0.005 # mouse input sensetivity
-var velocity = Vector3()   # player character movement stuff
+var velocity = Vector3(0, 0, 1)   # player character movement stuff
 var mousemotion            # mouse motion
 var tile = 0               # result of copying code from other project [LEGACY]
+var isflying = false       # flying (for debug reasons)
 
 # don't touch this
 onready var cam = $offset/primarycam
@@ -30,6 +32,9 @@ func _process(_delta):
 	if Input.is_action_just_pressed("flashlight"):
 		$offset/primarycam/SpotLight.visible = !$offset/primarycam/SpotLight.visible
 	
+	# T key by default
+	if Input.is_action_just_pressed("flight"):
+		isflying = not isflying
 
 func _physics_process(delta):
 	# don't touch that
@@ -49,16 +54,19 @@ func _physics_process(delta):
 	# convert velocity to local space
 	velocity = $vectorconvertor.vector_global_to_local(Transform($offset.global_transform.basis, Vector3()), velocity)
 	
-	# apply vertical forces
-	velocity.z += jumpspd * int(Input.is_action_pressed("jump")) * int(is_on_floor()) 
-	velocity.z -= gravity * delta
+	# apply vertical forces (and move vertical movement to separate var)
+	var vert_vel = velocity.z + jumpspd * int(Input.is_action_pressed("jump")) * (0.1 if isflying else int(is_on_floor())) - gravity * delta
+	velocity.z = 0
 	
 	# apply horizontal forces (not perfect solution. TODO: remake and polish this)
 	var move = Vector3()
 	move.y = -int(Input.is_action_pressed("backward"))+int(Input.is_action_pressed("forward"))
 	move.x = int(Input.is_action_pressed("straferight"))-int(Input.is_action_pressed("strafeleft"))
-	velocity.y = move.y * speed * delta
-	velocity.x = move.x * speed * delta
+	move = move.normalized()
+	
+	velocity = velocity.linear_interpolate(move * speed, accel * delta) if is_on_floor() else (velocity + (move * speed * delta))
+	
+	velocity.z = vert_vel
 	
 	# convert velocity back to global space
 	velocity = $vectorconvertor.vector_local_to_global(Transform($offset.global_transform.basis, Vector3()), velocity)
