@@ -4,10 +4,12 @@
 [ext_resource path="res://scenes/player.tres.gd" type="Script" id=2]
 
 [sub_resource type="CapsuleMesh" id=1]
-radius = 0.5
+radius = 0.25
+mid_height = 1.5
 
 [sub_resource type="CapsuleShape" id=2]
-radius = 0.5
+radius = 0.25
+height = 1.5
 
 [node name="player" type="KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
@@ -23,9 +25,10 @@ far = 15000.0
 
 [node name="placeablock" type="RayCast" parent="offset/primarycam"]
 enabled = true
-cast_to = Vector3( 0, 0, -10 )
+cast_to = Vector3( 0, 0, -15 )
 
 [node name="SpotLight" type="SpotLight" parent="offset/primarycam"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, -0.5 )
 shadow_enabled = true
 spot_range = 50.0
 

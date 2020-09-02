@@ -56,6 +56,8 @@ script = ExtResource( 5 )
 colorlight = Color( 0.647059, 0.839216, 0.945098, 1 )
 colorramp = SubResource( 1 )
 
+[node name="builds" type="Spatial" parent="."]
+
 [node name="Planet" type="MeshInstance" parent="."]
 mesh = SubResource( 3 )
 material/0 = null
