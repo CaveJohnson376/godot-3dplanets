@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://textures/8k_earth_daymap.jpg" type="Texture" id=1]
 [ext_resource path="res://scenes/player.tscn" type="PackedScene" id=2]
@@ -6,12 +6,17 @@
 [ext_resource path="res://textures/8k_earth_normal_map.png" type="Texture" id=4]
 [ext_resource path="res://scenes/main.tres.gd" type="Script" id=5]
 [ext_resource path="res://textures/sun.png" type="Texture" id=6]
+[ext_resource path="res://textures/8k_earth_specular_map.png" type="Texture" id=8]
 
-[sub_resource type="Curve" id=6]
+[sub_resource type="Curve" id=1]
 _data = [ Vector2( 0.417722, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.590717, 1 ), 0.0, 0.0, 0, 0 ]
 
 [sub_resource type="SpatialMaterial" id=2]
 albedo_texture = ExtResource( 1 )
+metallic = 1.0
+metallic_texture = ExtResource( 8 )
+roughness = 0.5
+roughness_texture = ExtResource( 8 )
 normal_enabled = true
 normal_scale = 1.0
 normal_texture = ExtResource( 4 )
@@ -23,23 +28,33 @@ height = 8192.0
 radial_segments = 1024
 rings = 512
 
-[sub_resource type="SphereShape" id=5]
+[sub_resource type="SphereShape" id=4]
 radius = 4096.0
 
-[sub_resource type="SpatialMaterial" id=7]
+[sub_resource type="GDScript" id=5]
+script/source = "extends Spatial
+
+export (NodePath) var bruh
+
+func _process(delta):
+	$sunhalo.global_transform.origin = get_node(bruh).translation + global_transform.origin
+	
+"
+
+[sub_resource type="SpatialMaterial" id=6]
 flags_transparent = true
 flags_unshaded = true
 params_billboard_mode = 1
 albedo_texture = ExtResource( 6 )
 
-[sub_resource type="QuadMesh" id=8]
-material = SubResource( 7 )
-size = Vector2( 200, 200 )
+[sub_resource type="QuadMesh" id=7]
+material = SubResource( 6 )
+size = Vector2( 2500, 2500 )
 
 [node name="main" type="Spatial"]
 script = ExtResource( 5 )
 colorlight = Color( 0.647059, 0.839216, 0.945098, 1 )
-colorramp = SubResource( 6 )
+colorramp = SubResource( 1 )
 
 [node name="Planet" type="MeshInstance" parent="."]
 mesh = SubResource( 3 )
@@ -50,23 +65,28 @@ material/0 = null
 ]]
 
 [node name="collisionzone" type="CollisionShape" parent="collision"]
-shape = SubResource( 5 )
+shape = SubResource( 4 )
 
 [node name="player" parent="." instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -3754.63, 1749.08, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1863, 3653, 1.9539e-05 )
 
 [node name="rotating_sun" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
 
 [node name="offset" type="Spatial" parent="rotating_sun"]
 
 [node name="sunlight" type="DirectionalLight" parent="rotating_sun/offset"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10000, 0 )
-light_bake_mode = 0
+light_energy = 2.0
+light_indirect_energy = 2.0
+light_specular = 1.0
+light_bake_mode = 2
 shadow_enabled = true
+script = SubResource( 5 )
+bruh = NodePath("../../../player")
 
 [node name="sunhalo" type="MeshInstance" parent="rotating_sun/offset/sunlight"]
-mesh = SubResource( 8 )
+mesh = SubResource( 7 )
 material/0 = null
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]

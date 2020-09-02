@@ -3,10 +3,10 @@
 [ext_resource path="res://scenes/vectorconvertor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/player.tres.gd" type="Script" id=2]
 
-[sub_resource type="CapsuleMesh" id=11]
+[sub_resource type="CapsuleMesh" id=1]
 radius = 0.5
 
-[sub_resource type="CapsuleShape" id=12]
+[sub_resource type="CapsuleShape" id=2]
 radius = 0.5
 
 [node name="player" type="KinematicBody"]
@@ -31,11 +31,11 @@ spot_range = 50.0
 
 [node name="shadows" type="MeshInstance" parent="offset"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.37114e-08, 1 )
-mesh = SubResource( 11 )
+mesh = SubResource( 1 )
 material/0 = null
 
 [node name="collision" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.37114e-08, 1 )
-shape = SubResource( 12 )
+shape = SubResource( 2 )
 
 [node name="vectorconvertor" parent="." instance=ExtResource( 1 )]
