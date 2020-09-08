@@ -59,6 +59,7 @@ var step = -0.1
 var minzoom = 0.1
 var maxzoom = 2.0
 var zoom = 1.0
+var tgzoom = 1.0
 
 func _process(delta):
 	if tracked:
@@ -69,10 +70,12 @@ func _process(delta):
 			size = 500 * zoom
 			pass
 	
+	zoom = lerp(zoom, tgzoom, delta * 5)
+	
 	if Input.is_action_just_pressed(\"mapscaleadd\"):
-		zoom = clamp(zoom + step, minzoom, maxzoom)
+		tgzoom = clamp(tgzoom + step, minzoom, maxzoom)
 	if Input.is_action_just_pressed(\"mapscalenotadd\"):
-		zoom = clamp(zoom - step, minzoom, maxzoom)
+		tgzoom = clamp(tgzoom - step, minzoom, maxzoom)
 	pass
 "
 
