@@ -5,7 +5,7 @@ const sprintspeed = 15     # speed when sprinting
 const defspeed = 10        # speed when walking
 const accel = 10           # acceleration
 var speed = 0              # current speed
-const jumpspd = 17         # speed of jump. Jump height depends on this
+const jumpspd = 12         # speed of jump. Jump height depends on this
 const sensetivity = -0.005 # mouse input sensetivity
 var velocity = Vector3(0, 0, 1)   # player character movement stuff
 var mousemotion            # mouse motion
@@ -47,9 +47,8 @@ func _physics_process(delta):
 	# building preview
 	var raypos = $offset/primarycam/placeablock.get_collision_point()
 	var norm = $offset/primarycam/placeablock.get_collision_normal()
-	var dir = -$offset.global_transform.basis.y
-	crate.translation = raypos
-	crate.look_at(raypos + norm, raypos + dir)
+	crate.transform = $offset.global_transform
+	crate.translation = raypos + norm * 0.5
 	
 	# building and deconstruct
 	if Input.is_action_just_pressed("place"):

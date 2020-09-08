@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://textures/8k_earth_daymap.jpg" type="Texture" id=1]
 [ext_resource path="res://scenes/player.tscn" type="PackedScene" id=2]
@@ -30,6 +30,42 @@ rings = 512
 
 [sub_resource type="SphereShape" id=4]
 radius = 4096.0
+
+[sub_resource type="QuadMesh" id=10]
+size = Vector2( 0.5, 0.5 )
+
+[sub_resource type="ViewportTexture" id=8]
+viewport_path = NodePath("player/offset/map/Viewport")
+
+[sub_resource type="SpatialMaterial" id=9]
+resource_local_to_scene = true
+flags_unshaded = true
+albedo_texture = SubResource( 8 )
+
+[sub_resource type="GDScript" id=12]
+script/source = "extends MeshInstance
+
+func _process(delta):
+	if Input.is_action_just_pressed(\"togglemap\"):
+		visible = not visible
+	pass
+"
+
+[sub_resource type="GDScript" id=11]
+script/source = "extends Camera
+
+export (NodePath) var tracked
+
+func _process(delta):
+	if tracked:
+		var tnode = get_node(tracked)
+		if tnode:
+			transform = tnode.global_transform
+			translation = translation + translation.normalized() * 100
+			print(translation, tnode.global_transform.origin)
+			pass
+	pass
+"
 
 [sub_resource type="GDScript" id=5]
 script/source = "extends Spatial
@@ -70,7 +106,27 @@ material/0 = null
 shape = SubResource( 4 )
 
 [node name="player" parent="." instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1863, 3653, 1.9539e-05 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -782.828, 3629.74, -1729.31 )
+
+[node name="map" type="MeshInstance" parent="player/offset" index="2"]
+transform = Transform( 1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0.199951, 1.1001 )
+mesh = SubResource( 10 )
+material/0 = SubResource( 9 )
+script = SubResource( 12 )
+
+[node name="Viewport" type="Viewport" parent="player/offset/map"]
+size = Vector2( 512, 512 )
+transparent_bg = true
+render_target_v_flip = true
+
+[node name="Camera" type="Camera" parent="player/offset/map/Viewport"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 4500, 0 )
+projection = 1
+current = true
+size = 1000.0
+far = 15000.0
+script = SubResource( 11 )
+tracked = NodePath("../../../..")
 
 [node name="rotating_sun" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
@@ -93,3 +149,5 @@ material/0 = null
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 3 )
+
+[editable path="player"]

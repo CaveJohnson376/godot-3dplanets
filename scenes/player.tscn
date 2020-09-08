@@ -18,7 +18,7 @@ script = ExtResource( 2 )
 [node name="offset" type="Spatial" parent="."]
 
 [node name="primarycam" type="Camera" parent="offset"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -6.55671e-08, 1.5 )
+transform = Transform( 1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, -6.55671e-08, 1.5 )
 current = true
 fov = 90.0
 far = 15000.0
@@ -28,7 +28,6 @@ enabled = true
 cast_to = Vector3( 0, 0, -15 )
 
 [node name="SpotLight" type="SpotLight" parent="offset/primarycam"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, -0.5 )
 shadow_enabled = true
 spot_range = 50.0
 

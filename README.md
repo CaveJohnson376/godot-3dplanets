@@ -27,4 +27,4 @@ My first attempt to make 3d planets with godot.
 - LMB - build static crates
 - RMB - remove static crates
 - Move mouse - look around
-
+- M - toggle map

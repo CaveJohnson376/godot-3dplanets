@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=2]
+
+[sub_resource type="QuadMesh" id=10]
+size = Vector2( 0.5, 0.5 )
+
+[sub_resource type="ViewportTexture" id=8]
+viewport_path = NodePath("offset/map/Viewport")
+
+[sub_resource type="SpatialMaterial" id=9]
+resource_local_to_scene = true
+albedo_texture = SubResource( 8 )
+
+[sub_resource type="GDScript" id=12]
+script/source = "extends Camera
+
+export (NodePath) var tracked
+
+func _process(delta):
+	if tracked:
+		var tnode = get_node(tracked)
+		if tnode:
+			transform = tnode.global_transform
+			#translation = translation + translation.normalized() * 100
+			#print(translation, tnode.global_transform.origin)
+			pass
+	pass
+"
+
+[node name="map" type="MeshInstance"]
+transform = Transform( 1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0.2, 1.1 )
+mesh = SubResource( 10 )
+material/0 = SubResource( 9 )
+
+[node name="Viewport" type="Viewport" parent="."]
+size = Vector2( 512, 512 )
+transparent_bg = true
+
+[node name="Camera" type="Camera" parent="Viewport"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+projection = 1
+current = true
+size = 50.0
+far = 15000.0
+script = SubResource( 12 )
+tracked = NodePath("../../..")
