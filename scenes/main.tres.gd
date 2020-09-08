@@ -4,7 +4,7 @@ extends Spatial
 export var colordark = Color() # color of sky during night time
 export var colorlight = Color() # color of sky during day time
 export(Curve) var colorramp # this controls, how sky changes the color
-export var daylightcycleduration = 60 # daylight cycle duration, in seconds
+export var daylightcycleduration = 600 # daylight cycle duration, in seconds
 
 func _ready():
 	# this one is required to work properly

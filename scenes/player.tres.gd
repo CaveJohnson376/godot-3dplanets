@@ -1,9 +1,9 @@
 extends KinematicBody
 
 const gravity = 98/2       # gravity accel
-const sprintspeed = 15     # speed when sprinting
-const defspeed = 10        # speed when walking
-const accel = 10           # acceleration
+const sprintspeed = 12.5     # speed when sprinting
+const defspeed = 7.5        # speed when walking
+const accel = 20           # acceleration
 var speed = 0              # current speed
 const jumpspd = 12         # speed of jump. Jump height depends on this
 const sensetivity = -0.005 # mouse input sensetivity
@@ -45,10 +45,16 @@ func _process(_delta):
 
 func _physics_process(delta):
 	# building preview
-	var raypos = $offset/primarycam/placeablock.get_collision_point()
-	var norm = $offset/primarycam/placeablock.get_collision_normal()
-	crate.transform = $offset.global_transform
-	crate.translation = raypos + norm * 0.5
+	if crate and $offset/primarycam/placeablock.is_colliding():
+		var raypos = $offset/primarycam/placeablock.get_collision_point()
+		var norm = $offset/primarycam/placeablock.get_collision_normal()
+		crate.transform = $offset.global_transform
+		crate.translation = raypos + norm * 0.5
+	if not crate and $offset/primarycam/placeablock.is_colliding():
+		crate = cratescene.instance()
+		$"../builds".add_child(crate)
+	if crate and not $offset/primarycam/placeablock.is_colliding():
+		crate.queue_free()
 	
 	# building and deconstruct
 	if Input.is_action_just_pressed("place"):

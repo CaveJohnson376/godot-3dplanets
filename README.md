@@ -28,3 +28,4 @@ My first attempt to make 3d planets with godot.
 - RMB - remove static crates
 - Move mouse - look around
 - M - toggle map
+- keypad +/- - map zoom in/out
